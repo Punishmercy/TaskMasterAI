@@ -46,11 +46,14 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
+  const isProd = process.env.NODE_ENV === "production";
+
+  if (isProd) {
     serveStatic(app);
+  } else {
+    await setupVite(app, server);
   }
+
 
   const port = 5000;
   server.listen(port, "127.0.0.1", () => {
