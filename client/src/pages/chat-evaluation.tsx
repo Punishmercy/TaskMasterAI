@@ -285,7 +285,7 @@ export default function ChatEvaluation() {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-slate-900">
-                Multi-Turn Task
+                Multi-Turn
                 {taskData && (
                   <span className="ml-2 text-base text-blue-600">- Task #{taskData.id}</span>
                 )}
