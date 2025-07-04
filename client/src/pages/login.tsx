@@ -14,7 +14,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  
+
   // Registration form state
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
@@ -58,10 +58,10 @@ export default function Login() {
   });
 
   const handleLogin = (role: "admin" | "tasker") => {
-    const credentials = role === "admin" 
+    const credentials = role === "admin"
       ? { username: "admin", password: "admin" }
       : { username: "tasker", password: "tasker" };
-    
+
     setUsername(credentials.username);
     setPassword(credentials.password);
     loginMutation.mutate(credentials);
@@ -82,27 +82,27 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    
+
     if (!regUsername || !regPassword || !regConfirmPassword) {
       setError("Please fill in all fields");
       return;
     }
-    
+
     if (regUsername.length < 3) {
       setError("Username must be at least 3 characters long");
       return;
     }
-    
+
     if (regPassword.length < 3) {
       setError("Password must be at least 3 characters long");
       return;
     }
-    
+
     if (regPassword !== regConfirmPassword) {
       setError("Passwords do not match");
       return;
     }
-    
+
     registerMutation.mutate({ username: regUsername, password: regPassword });
   };
 
@@ -111,7 +111,7 @@ export default function Login() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-slate-900">
-            Chat Evaluation Platform
+            Multi-Turn Test
           </CardTitle>
           <CardDescription>
             Sign in or create a new tasker account
@@ -208,7 +208,7 @@ export default function Login() {
               <div className="text-center">
                 <UserPlus className="h-12 w-12 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-lg font-medium text-slate-900 mb-2">Create Tasker Account</h3>
-                <p className="text-sm text-slate-600">Join the platform to start evaluating AI responses</p>
+                <p className="text-sm text-slate-600">Join asap</p>
               </div>
 
               {/* Registration Form */}
@@ -255,10 +255,7 @@ export default function Login() {
                 </Button>
               </form>
 
-              <div className="text-center text-xs text-slate-500">
-                <p>All accounts are created with "tasker" role</p>
-                <p>You'll earn $5 for each completed evaluation task</p>
-              </div>
+
             </TabsContent>
           </Tabs>
         </CardContent>

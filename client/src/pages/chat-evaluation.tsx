@@ -140,11 +140,11 @@ export default function ChatEvaluation() {
       setCurrentConversation(null);
       setConversationRatings(new Map());
       setDraftRatings(new Map());
-      
+
       // Reset timer
       setTaskStartTime(new Date());
       setElapsedTime("0:00");
-      
+
       // Create a new task automatically
       createTaskMutation.mutate();
     },
@@ -200,17 +200,17 @@ export default function ChatEvaluation() {
 
   const handleRatingSubmit = (ratings: any) => {
     if (!selectedConversationId) return;
-    
+
     // Save to submitted ratings (this replaces draft)
     setConversationRatings(prev => new Map(prev.set(selectedConversationId, ratings)));
-    
+
     // Clear draft ratings since it's now submitted
     setDraftRatings(prev => {
       const newMap = new Map(prev);
       newMap.delete(selectedConversationId);
       return newMap;
     });
-    
+
     // Auto-save to server
     autoSaveRatingMutation.mutate({
       ratings,
@@ -220,14 +220,14 @@ export default function ChatEvaluation() {
 
   const handleRatingChange = (ratings: any) => {
     if (!selectedConversationId) return;
-    
+
     // Save draft ratings as user makes changes
     setDraftRatings(prev => new Map(prev.set(selectedConversationId, ratings)));
-    
+
     // Auto-save to server if all 5 criteria are filled for this conversation
-    const allRatingsFilled = ratings.accuracy && ratings.clarity && ratings.relevance && 
-                           ratings.consistency && ratings.completeness;
-    
+    const allRatingsFilled = ratings.accuracy && ratings.clarity && ratings.relevance &&
+      ratings.consistency && ratings.completeness;
+
     if (allRatingsFilled) {
       autoSaveRatingMutation.mutate({
         ratings,
@@ -247,10 +247,10 @@ export default function ChatEvaluation() {
   const conversations = taskData?.conversations || [];
   const isAtMaxTurns = taskData && taskData.currentTurn > taskData.maxTurns;
   const canContinue = !taskData?.completed && !isAtMaxTurns;
-  
+
   // Show Complete Evaluation button when all 3 turns are done AND all 15 ratings are filled
   const showCompleteButton = conversations.length === 3 && isAtMaxTurns;
-  
+
   // Check if all 15 rating values are filled (5 criteria × 3 conversations)
   const allRatingsComplete = conversations.length === 3 && conversations.every(conv => {
     // Check draft ratings first, then saved ratings, then server ratings
@@ -258,9 +258,9 @@ export default function ChatEvaluation() {
     const savedRating = conversationRatings.get(conv.id);
     const serverRating = conv.rating;
     const ratings = draftRating || savedRating || serverRating;
-    
-    return ratings && ratings.accuracy && ratings.clarity && ratings.relevance && 
-           ratings.consistency && ratings.completeness;
+
+    return ratings && ratings.accuracy && ratings.clarity && ratings.relevance &&
+      ratings.consistency && ratings.completeness;
   });
 
 
@@ -285,7 +285,7 @@ export default function ChatEvaluation() {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-slate-900">
-                Chat Evaluation Platform
+                Multi-Turn Task
                 {taskData && (
                   <span className="ml-2 text-base text-blue-600">- Task #{taskData.id}</span>
                 )}
@@ -296,7 +296,7 @@ export default function ChatEvaluation() {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-6">
             {/* Progress indicator */}
             {taskData && (
@@ -306,11 +306,10 @@ export default function ChatEvaluation() {
                   {Array.from({ length: taskData.maxTurns }, (_, i) => (
                     <div
                       key={i}
-                      className={`w-3 h-3 rounded-full ${
-                        i < Math.min(taskData.currentTurn, taskData.maxTurns) 
-                          ? "bg-blue-600" 
-                          : "bg-slate-300"
-                      }`}
+                      className={`w-3 h-3 rounded-full ${i < Math.min(taskData.currentTurn, taskData.maxTurns)
+                        ? "bg-blue-600"
+                        : "bg-slate-300"
+                        }`}
                     />
                   ))}
                 </div>
@@ -327,7 +326,7 @@ export default function ChatEvaluation() {
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col">
           {/* Chat Messages Area */}
-          <div 
+          <div
             ref={chatAreaRef}
             className="flex-1 overflow-y-auto p-6 space-y-6"
           >
@@ -352,7 +351,7 @@ export default function ChatEvaluation() {
                   isUser={true}
                   timestamp={conversation.timestamp}
                 />
-                <div 
+                <div
                   onClick={() => setSelectedConversationId(conversation.id)}
                   className="cursor-pointer hover:bg-blue-50 rounded-lg transition-colors"
                 >
@@ -425,9 +424,9 @@ export default function ChatEvaluation() {
                 const savedRating = conversationRatings.get(selectedConversationId);
                 const serverRating = selectedConversation.rating;
                 const initialRatings = draftRating || savedRating || serverRating || undefined;
-                
 
-                
+
+
                 return (
                   <RatingPanel
                     conversation={selectedConversation}

@@ -48,7 +48,7 @@ export default function Dashboard() {
   }
 
   const currentStats = userStats || user;
-  const avgEarningsPerTask = currentStats.tasksCompleted > 0 
+  const avgEarningsPerTask = currentStats.tasksCompleted > 0
     ? (parseFloat(currentStats.totalEarnings) / currentStats.tasksCompleted).toFixed(2)
     : "0.00";
 
@@ -70,9 +70,9 @@ export default function Dashboard() {
             <Badge variant="secondary" className="text-xs">
               {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
             </Badge>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleLogout}
               className="flex items-center space-x-2"
             >
@@ -139,15 +139,15 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <PlayCircle className="h-5 w-5 text-blue-600" />
-              <span>Ready to Start Evaluating?</span>
+              <span>Ready to Start?</span>
             </CardTitle>
             <CardDescription>
-              Begin a new AI response evaluation task. Each task contains 3 prompts and responses 
+              Begin a new AI response evaluation task. Each task contains 3 prompts and responses
               that you'll rate across 5 criteria.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
+            <Button
               onClick={handleStartTasking}
               className="bg-blue-600 hover:bg-blue-700 text-white"
               size="lg"
