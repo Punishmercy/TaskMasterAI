@@ -9,22 +9,45 @@ const router = express.Router();
 router.post('/login', async (req, res) => {
   const { email } = req.body;
 
-  // 1. Buscar usuario en la BD
+  if (!email) {
+    return res.status(400).json({ error: 'El campo email es obligatorio' });
+  }
+
+  // Buscar usuario por email
   const user = await db.query.users.findFirst({
     where: eq(users.email, email),
+    columns: {
+      id: true,
+      email: true,
+      role: true,
+    },
   });
+
 
   if (!user) {
     return res.status(401).json({ error: 'Usuario no encontrado' });
   }
 
-  // 2. Generar token JWT
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-    expiresIn: '7d',
-  });
+  // Generar token
+  const token = jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    },
+    process.env.JWT_SECRET!,
+    { expiresIn: '7d' }
+  );
 
-  // 3. Enviar token al cliente
-  res.json({ token, userId: user.id });
+  // Respuesta
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role
+    },
+  });
 });
 
 export default router;

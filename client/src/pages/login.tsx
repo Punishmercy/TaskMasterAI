@@ -25,12 +25,13 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", credentials);
       return response.json();
     },
-    onSuccess: (user) => {
-      // Store user info and redirect based on role
-      localStorage.setItem("user", JSON.stringify(user));
-      if (user.role === "admin") {
+    onSuccess: (data) => {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user)); // si quieres guardar también el usuario
+
+      if (data.user.role === "admin") {
         window.location.href = "/admin";
-      } else {
+      } else if (data.user.role === "tasker") {
         window.location.href = "/dashboard";
       }
     },
@@ -38,6 +39,7 @@ export default function Login() {
       setError(error.message || "Login failed");
     },
   });
+
 
   const registerMutation = useMutation({
     mutationFn: async (userData: { username: string; password: string }) => {
