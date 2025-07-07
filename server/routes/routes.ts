@@ -4,7 +4,7 @@ import { storage } from "../storage";
 import { promptSchema, insertRatingSchema, loginSchema } from "@shared/schema";
 import { generateChatResponse } from "../services/openai";
 import { authMiddleware } from "../middleware/auth";
-import { signToken } from "../utils/jwt"; // al inicio del archivo
+import { signToken } from "server/utils/jwt"; // al inicio del archivo
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
