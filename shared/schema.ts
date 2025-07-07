@@ -25,6 +25,7 @@ export const tasks = pgTable("tasks", {
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
   taskId: integer("task_id").notNull(),
+  userId: integer("user_id"), // NUEVO
   turn: integer("turn").notNull(),
   userPrompt: text("user_prompt").notNull(),
   aiResponse: text("ai_response").notNull(),
@@ -35,6 +36,7 @@ export const conversations = pgTable("conversations", {
 export const ratings = pgTable("ratings", {
   id: serial("id").primaryKey(),
   conversationId: integer("conversation_id").notNull(),
+  userId: integer("user_id"), // NUEVO
   accuracy: integer("accuracy").notNull(),
   clarity: integer("clarity").notNull(),
   relevance: integer("relevance").notNull(),

@@ -6,23 +6,23 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
-  
+
   // Task methods
   createTask(task: InsertTask): Promise<Task>;
   getTask(id: number): Promise<Task | undefined>;
   updateTask(id: number, updates: Partial<Task>): Promise<Task | undefined>;
   getTasksByUser(userId: number): Promise<Task[]>;
-  
+
   // Conversation methods
   createConversation(conversation: InsertConversation): Promise<Conversation>;
   getConversationsByTask(taskId: number): Promise<Conversation[]>;
   updateConversation(id: number, updates: Partial<Conversation>): Promise<Conversation | undefined>;
-  
+
   // Rating methods
   createRating(rating: InsertRating): Promise<Rating>;
   getRatingByConversation(conversationId: number): Promise<Rating | undefined>;
   updateRating(id: number, updates: Partial<Rating>): Promise<Rating | undefined>;
-  
+
   // Admin methods
   getAllTasksWithUsers(): Promise<any[]>;
   getTaskWithConversationsAndRatings(taskId: number): Promise<any | undefined>;
@@ -47,7 +47,7 @@ export class MemStorage implements IStorage {
     this.currentTaskId = 1;
     this.currentConversationId = 1;
     this.currentRatingId = 1;
-    
+
     // Initialize demo users
     this.initializeDemoUsers();
   }
@@ -88,10 +88,19 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getConversationsByUser(userId: number): Promise<Conversation[]> {
+    return Array.from(this.conversations.values()).filter(conv => conv.userId === userId);
+  }
+
+  async getRatingsByUser(userId: number): Promise<Rating[]> {
+    return Array.from(this.ratings.values()).filter(rating => rating.userId === userId);
+  }
+
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { 
-      ...insertUser, 
+    const user: User = {
+      ...insertUser,
       id,
       role: insertUser.role || "tasker",
       tasksCompleted: 0,
@@ -125,7 +134,7 @@ export class MemStorage implements IStorage {
   async updateTask(id: number, updates: Partial<Task>): Promise<Task | undefined> {
     const task = this.tasks.get(id);
     if (!task) return undefined;
-    
+
     const updatedTask = { ...task, ...updates };
     this.tasks.set(id, updatedTask);
     return updatedTask;
@@ -136,6 +145,7 @@ export class MemStorage implements IStorage {
     const conversation: Conversation = {
       ...insertConversation,
       id,
+      userId: insertConversation.userId || null, // 👈 aquí lo agregas
       timestamp: new Date(),
       wordCount: insertConversation.wordCount || null,
     };
@@ -149,11 +159,12 @@ export class MemStorage implements IStorage {
       .sort((a, b) => a.turn - b.turn);
   }
 
-  async createRating(insertRating: InsertRating): Promise<Rating> {
+  async createRating(insertRating: InsertRating & { userId?: number }): Promise<Rating> {
     const id = this.currentRatingId++;
     const rating: Rating = {
       ...insertRating,
       id,
+      userId: insertRating.userId || null, // 👈 aquí agregamos el userId
       comments: insertRating.comments || null,
       timestamp: new Date(),
     };
@@ -170,7 +181,7 @@ export class MemStorage implements IStorage {
   async updateRating(id: number, updates: Partial<Rating>): Promise<Rating | undefined> {
     const rating = this.ratings.get(id);
     if (!rating) return undefined;
-    
+
     const updatedRating = { ...rating, ...updates };
     this.ratings.set(id, updatedRating);
     return updatedRating;
@@ -179,7 +190,7 @@ export class MemStorage implements IStorage {
   async updateConversation(id: number, updates: Partial<Conversation>): Promise<Conversation | undefined> {
     const conversation = this.conversations.get(id);
     if (!conversation) return undefined;
-    
+
     const updatedConversation = { ...conversation, ...updates };
     this.conversations.set(id, updatedConversation);
     return updatedConversation;
@@ -188,7 +199,7 @@ export class MemStorage implements IStorage {
   async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
     const user = this.users.get(id);
     if (!user) return undefined;
-    
+
     const updatedUser = { ...user, ...updates };
     this.users.set(id, updatedUser);
     return updatedUser;
@@ -205,10 +216,10 @@ export class MemStorage implements IStorage {
     const tasks = Array.from(this.tasks.values());
     return tasks.map(task => ({
       ...task,
-      user: this.users.get(task.userId || 0) || { 
-        id: 0, 
-        username: "Unknown", 
-        role: "unknown" 
+      user: this.users.get(task.userId || 0) || {
+        id: 0,
+        username: "Unknown",
+        role: "unknown"
       }
     })).sort((a, b) => a.id - b.id); // Sort by task ID to maintain chronological order
   }
@@ -234,19 +245,19 @@ export class MemStorage implements IStorage {
       taskId,
       conversationsCount: conversations.length,
       ratingsCount: Array.from(this.ratings.values()).length,
-      conversationsWithRatings: conversationsWithRatings.map(c => ({ 
-        id: c.id, 
-        turn: c.turn, 
-        hasRating: !!c.rating 
+      conversationsWithRatings: conversationsWithRatings.map(c => ({
+        id: c.id,
+        turn: c.turn,
+        hasRating: !!c.rating
       }))
     });
 
     return {
       ...task,
-      user: this.users.get(task.userId || 0) || { 
-        id: 0, 
-        username: "Unknown", 
-        role: "unknown" 
+      user: this.users.get(task.userId || 0) || {
+        id: 0,
+        username: "Unknown",
+        role: "unknown"
       },
       conversations: conversationsWithRatings
     };

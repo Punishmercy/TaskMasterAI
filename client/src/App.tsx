@@ -8,6 +8,7 @@ import Login from "@/pages/login";
 import Dashboard from "@/pages/dashboard";
 import AdminDashboard from "@/pages/admin-dashboard";
 import NotFound from "@/pages/not-found";
+import { CreateTask } from "./components/CreateTask";
 
 function Router() {
   return (
@@ -31,5 +32,6 @@ function App() {
     </QueryClientProvider>
   );
 }
+
 
 export default App;

@@ -1,9 +1,11 @@
-import { signToken } from "../utils/jwt"; // al inicio del archivo
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "../storage";
 import { promptSchema, insertRatingSchema, loginSchema } from "@shared/schema";
-import { generateChatResponse } from "./services/openai";
+import { generateChatResponse } from "../services/openai";
+import { authMiddleware } from "../middleware/auth";
+import { signToken } from "../utils/jwt"; // al inicio del archivo
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -24,14 +26,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Invalid username or password" });
       }
 
-      // ✅ Generar JWT
-      const token = signToken(user.id);
 
-      // ✅ Enviar token y datos del usuario
-      const { password: _, ...userData } = user;
-      res.json({ user: userData, token });
+      // ✅ Generar y devolver token
+      const token = signToken(user.id);
+      const { password: _, ...userResponse } = user;
+      res.json({ user: userResponse, token });
+
     } catch (error) {
-      console.error("Login error:", error);
+      console.error('Login error:', error);
       res.status(500).json({ error: "Login failed" });
     }
   });
@@ -115,11 +117,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new task
-  app.post("/api/tasks", async (req, res) => {
+  app.post("/api/tasks", authMiddleware, async (req, res) => {
     try {
-      const { userId } = req.body;
+      const userId = req.userId!; // 👈 tomado del token JWT automáticamente
       const task = await storage.createTask({
-        userId: userId || null,
+        userId, // 👈 ya no se extrae del body
       });
       res.json(task);
     } catch (error) {
@@ -204,7 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate AI response using contextual prompt
       const { response, wordCount } = await generateChatResponse(contextualPrompt);
 
-      const { userId } = req.body; // línea nueva
+      const userId = req.userId; // línea nueva
 
       // Save conversation
       const conversation = await storage.createConversation({
@@ -234,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Submit rating for a conversation
-  app.post("/api/ratings", async (req, res) => {
+  app.post("/api/ratings", authMiddleware, async (req, res) => {
     try {
       const validation = insertRatingSchema.safeParse(req.body);
       if (!validation.success) {
@@ -245,7 +247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const ratingData = validation.data;
-      const { userId } = req.body;
+      const userId = req.userId;
 
       // Check if rating already exists for this conversation
       const existingRating = await storage.getRatingByConversation(ratingData.conversationId);
@@ -259,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create rating
       const rating = await storage.createRating({
         ...ratingData,
-        userId: userId || null
+        userId: userId!
       });
 
 
@@ -272,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Complete task
-  app.post("/api/tasks/:id/complete", async (req, res) => {
+  app.post("/api/tasks/:id/complete", authMiddleware, async (req, res) => {
     try {
       const taskId = parseInt(req.params.id);
       const task = await storage.updateTask(taskId, {
@@ -385,8 +387,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.id);
 
       const tasks = await storage.getTasksByUser(userId);
-      const conversations = Array.from(storage.conversations.values()).filter(c => c.userId === userId);
-      const ratings = Array.from(storage.ratings.values()).filter(r => r.userId === userId);
+      const conversations = await storage.getConversationsByUser(userId);
+      const ratings = await storage.getRatingsByUser(userId);
+
 
       res.json({
         tasks,
