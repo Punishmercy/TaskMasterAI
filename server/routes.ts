@@ -1,4 +1,4 @@
-import { signToken } from "../utils/jwt"; // al inicio del archivo
+import { signToken } from "./utils/jwt"; // al inicio del archivo
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -385,8 +385,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.id);
 
       const tasks = await storage.getTasksByUser(userId);
-      const conversations = Array.from(storage.conversations.values()).filter(c => c.userId === userId);
-      const ratings = Array.from(storage.ratings.values()).filter(r => r.userId === userId);
+      const conversations = await storage.getConversationsByUser(userId);
+      const ratings = await storage.getRatingsByUser(userId);
+
 
       res.json({
         tasks,
