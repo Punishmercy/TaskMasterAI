@@ -139,22 +139,30 @@ export default function Login() {
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => handleLogin("admin")}
-                    disabled={loginMutation.isPending}
+                    onClick={() => {
+                      localStorage.setItem("token", "fake-admin-token");
+                      localStorage.setItem("user", JSON.stringify({ role: "admin" }));
+                      window.location.href = "/admin";
+                    }}
                     className="h-12 flex-col space-y-1"
                   >
                     <Users className="h-4 w-4" />
                     <span className="text-xs">Admin</span>
                   </Button>
+
                   <Button
                     variant="outline"
-                    onClick={() => handleLogin("tasker")}
-                    disabled={loginMutation.isPending}
+                    onClick={() => {
+                      localStorage.setItem("token", "fake-tasker-token");
+                      localStorage.setItem("user", JSON.stringify({ role: "tasker" }));
+                      window.location.href = "/dashboard";
+                    }}
                     className="h-12 flex-col space-y-1"
                   >
                     <User className="h-4 w-4" />
                     <span className="text-xs">Demo Tasker</span>
                   </Button>
+
                 </div>
               </div>
 
